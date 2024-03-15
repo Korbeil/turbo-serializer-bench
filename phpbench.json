@@ -1,0 +1,15 @@
+{
+    "runner.bootstrap": "vendor/autoload.php",
+    "runner.executors": {
+        "microtime": {"executor":"microtime"}
+    },
+    "runner.path": "src/Bench",
+    "runner.progress": "dots",
+    "runner.time_unit": "milliseconds",
+    "report.generators": {
+        "detailled": {
+            "generator": "expression",
+            "cols": [ "benchmark", "subject", "mean", "worst", "best", "mem_peak" ]
+        }
+    }
+}

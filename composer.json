@@ -1,0 +1,32 @@
+{
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:Korbeil/turbo-serializer.git",
+            "no-api": true
+        },
+        {
+            "type": "vcs",
+            "url": "git@github.com:mtarld/json-encoder-bundle.git",
+            "no-api": true
+        }
+    ],
+    "require": {
+        "phpbench/phpbench": "^1.2",
+        "symfony/serializer": "^7.1@dev",
+        "jolicode/automapper": "@dev",
+        "symfony/cache": "^7.0",
+        "symfony/property-access": "^7.0",
+        "symfony/yaml": "^7.0",
+        "phpdocumentor/reflection-docblock": "^5.3",
+        "korbeil/turbo-serializer": "@dev",
+        "mtarld/json-encoder-bundle": "@dev",
+        "symfony/type-info": "^7.1@dev",
+        "symfony/var-exporter": "^7.1@dev"
+    },
+    "autoload": {
+        "psr-4": {
+            "Korbeil\\TurboSerializerBench\\" : "src/"
+        }
+    }
+}

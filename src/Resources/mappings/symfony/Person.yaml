@@ -1,0 +1,7 @@
+Korbeil\AutoMapperBenchmark\Person:
+  attributes:
+    id: ~
+    name: ~
+    married: ~
+    favoriteColors: ~
+    mother: ~
