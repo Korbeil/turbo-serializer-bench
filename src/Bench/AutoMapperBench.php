@@ -4,6 +4,7 @@ namespace Korbeil\TurboSerializerBench\Bench;
 
 use AutoMapper\AutoMapper;
 use Korbeil\TurboSerializerBench\AbstractBench;
+use Korbeil\TurboSerializerBench\Person;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 
 class AutoMapperBench extends AbstractBench
@@ -11,25 +12,27 @@ class AutoMapperBench extends AbstractBench
     private AutoMapper $autoMapper;
     private JsonEncoder $encoder;
 
+    private string $type;
+
     public function bootstrap(): void
     {
         $this->autoMapper = AutoMapper::create();
         $this->encoder = new JsonEncoder();
+        $this->type = sprintf('%s[]', Person::class);
     }
 
-    protected function doBenchSerialize(array $objects): void
+
+    protected function doBenchSerialize(): string
     {
-        $array = [];
-        foreach ($objects as $object) {
-            $array[] = $this->autoMapper->map($object, 'array');
-        }
-        $this->encoder->encode($array, 'json');
+        return $this->encoder->encode(array_map(fn (Person $p): array => $this->autoMapper->map($p, 'array'), $this->toSerialize), 'json');
     }
 
-    protected function doBenchDeserialize(string $content, string $type): void
+    protected function doBenchDeserialize(): array
     {
-        $decoded = $this->encoder->decode($content, 'json');
-        $this->autoMapper->map($decoded, sprintf('%s[]', $type));
+        // var_dump($this->encoder->decode($this->toDeserialize, 'json'), $this->type);
+
+        return [];
+        return $this->autoMapper->map([], $this->type);
     }
 
     public function getName(): string

@@ -2,49 +2,58 @@
 
 namespace Korbeil\TurboSerializerBench\Bench;
 
-use Symfony\Component\Cache\Adapter\ApcuAdapter;
+use Korbeil\TurboSerializerBench\Person;
+use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
+use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
+use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
+use Symfony\Component\PropertyAccess\PropertyAccessor;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
+use Symfony\Component\Serializer\Mapping\ClassDiscriminatorFromClassMetadata;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Mapping\Factory\CacheClassMetadataFactory;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
-use Symfony\Component\Serializer\Mapping\Loader\LoaderChain;
-use Symfony\Component\Serializer\Mapping\Loader\YamlFileLoader;
+use Symfony\Component\Serializer\Mapping\Loader\AttributeLoader;
+use Symfony\Component\Serializer\NameConverter\MetadataAwareNameConverter;
+use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Normalizer\ArrayDenormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Korbeil\TurboSerializerBench\AbstractBench;
 
-/**
- * Class SymfonyBench
- * @package TSantos\Benchmark\Bench
- */
 class SymfonyBench extends AbstractBench
 {
-    /**
-     * @var SerializerInterface
-     */
-    private $serializer;
+    private SerializerInterface $serializer;
+
+    private string $type;
 
     public function bootstrap(): void
     {
-        $metadataFactory = new ClassMetadataFactory(new LoaderChain([
-            new YamlFileLoader($this->getResourceDir('/mappings/symfony/Person.yaml')),
-            new YamlFileLoader($this->getResourceDir('/mappings/symfony/Post.yaml')),
-        ]), new ApcuAdapter('SymfonyMetadata'));
+        $classMetadataFactory = new CacheClassMetadataFactory(new ClassMetadataFactory(new AttributeLoader()), new ArrayAdapter());
 
-        $encoders = array(new JsonEncoder());
-        $normalizers = array(new PropertyNormalizer($metadataFactory), new ObjectNormalizer($metadataFactory), new ArrayDenormalizer());
-        $this->serializer = new Serializer($normalizers, $encoders);
+        $this->serializer = new Serializer([
+            new ArrayDenormalizer(),
+            new DateTimeNormalizer(),
+            new ObjectNormalizer(
+                $classMetadataFactory,
+                new MetadataAwareNameConverter($classMetadataFactory),
+                new PropertyAccessor(),
+                new PropertyInfoExtractor([], [new PhpDocExtractor(), new ReflectionExtractor()]),
+                new ClassDiscriminatorFromClassMetadata($classMetadataFactory),
+            ),
+        ], [new JsonEncoder()]);
+
+        $this->type = sprintf('%s[]', Person::class);
     }
 
-    protected function doBenchSerialize(array $objects): void
+    protected function doBenchSerialize(): string
     {
-        $this->serializer->serialize($objects, 'json');
+        return $this->serializer->serialize($this->toSerialize, 'json');
     }
 
-    protected function doBenchDeserialize(string $content, string $type): void
+    protected function doBenchDeserialize(): array
     {
-        $this->serializer->deserialize($content, $type . '[]', 'json');
+        return $this->serializer->deserialize($this->toDeserialize, $this->type, 'json');
     }
 
     public function getName(): string
