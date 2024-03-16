@@ -2,18 +2,13 @@
 
 namespace Korbeil\TurboSerializerBench;
 
-use Mtarld\JsonEncoderBundle\Attribute\EncodedName;
-use Symfony\Component\Serializer\Attribute\SerializedName;
-
 class Person
 {
-    #[EncodedName('@id')]
-    #[SerializedName('@id')]
-    public int $id;
+    public int $id = 1;
 
-    public string $name;
+    public string $name = 'Joe';
 
-    public bool $married;
+    public bool $married = true;
 
-    public array $favoriteColors;
+    public array $favoriteColors = ['blue', 'red'];
 }

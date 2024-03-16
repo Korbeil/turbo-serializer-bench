@@ -20,12 +20,10 @@ use Symfony\Component\TypeInfo\TypeContext\TypeContextFactory;
 use Symfony\Component\TypeInfo\TypeResolver\StringTypeResolver;
 use Symfony\Component\TypeInfo\TypeResolver\TypeResolver as TypeInfoResolver;
 
-class JsonEncoderBench extends AbstractBench
+final class JsonEncoderBench extends AbstractBench
 {
     private EncoderInterface $encoder;
     private DecoderInterface $decoder;
-
-    private Type $type;
 
     public function bootstrap(): void
     {
@@ -51,18 +49,16 @@ class JsonEncoderBench extends AbstractBench
             )),
             $typeContextFactory,
         ), $decoderCacheDir);
-
-        $this->type = Type::list(Type::object(Person::class));
     }
 
     protected function doBenchSerialize(): string
     {
-        return (string) $this->encoder->encode($this->toSerialize, config: ['type' => $this->type]);
+        return (string) $this->encoder->encode($this->toSerialize, Type::list(Type::object(Person::class)));
     }
 
     protected function doBenchDeserialize(): array
     {
-        return $this->decoder->decode($this->toDeserialize, $this->type);
+        return $this->decoder->decode($this->toDeserialize, Type::list(Type::object(Person::class)));
     }
 
     public function getName(): string

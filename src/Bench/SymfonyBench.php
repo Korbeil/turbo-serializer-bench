@@ -21,11 +21,9 @@ use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Korbeil\TurboSerializerBench\AbstractBench;
 
-class SymfonyBench extends AbstractBench
+final class SymfonyBench extends AbstractBench
 {
     private SerializerInterface $serializer;
-
-    private string $type;
 
     public function bootstrap(): void
     {
@@ -42,8 +40,6 @@ class SymfonyBench extends AbstractBench
                 new ClassDiscriminatorFromClassMetadata($classMetadataFactory),
             ),
         ], [new JsonEncoder()]);
-
-        $this->type = sprintf('%s[]', Person::class);
     }
 
     protected function doBenchSerialize(): string
@@ -53,7 +49,7 @@ class SymfonyBench extends AbstractBench
 
     protected function doBenchDeserialize(): array
     {
-        return $this->serializer->deserialize($this->toDeserialize, $this->type, 'json');
+        return $this->serializer->deserialize($this->toDeserialize, sprintf('%s[]', Person::class), 'json');
     }
 
     public function getName(): string

@@ -40,12 +40,7 @@ abstract class AbstractBench implements BenchInterface
         $this->toSerialize = [];
 
         for ($i = 0; $i < 200; $i++) {
-            $p = new Person();
-            $p->id = $i;
-            $p->name = 'Name';
-            $p->married = true;
-            $p->favoriteColors = ['blue', 'red'];
-            $this->toSerialize[] = $p;
+            $this->toSerialize[] = new Person();
         }
 
         $this->toDeserialize = json_encode($this->toSerialize);
