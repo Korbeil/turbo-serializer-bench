@@ -7,17 +7,8 @@ use Korbeil\TurboSerializerBench\AbstractBench;
 use Korbeil\TurboSerializerBench\Person;
 use Mtarld\JsonEncoderBundle\JsonDecoder;
 use Mtarld\JsonEncoderBundle\JsonEncoder;
-use Mtarld\JsonEncoderBundle\Mapping\Encode\AttributePropertyMetadataLoader as EncodeAttributePropertyMetadataLoader;
-use Mtarld\JsonEncoderBundle\Mapping\Encode\DateTimeTypePropertyMetadataLoader as EncodeDateTimeTypePropertyMetadataLoader;
-use Mtarld\JsonEncoderBundle\Mapping\Decode\AttributePropertyMetadataLoader as DecodeAttributePropertyMetadataLoader;
-use Mtarld\JsonEncoderBundle\Mapping\Decode\DateTimeTypePropertyMetadataLoader as DecodeDateTimeTypePropertyMetadataLoader;
-use Mtarld\JsonEncoderBundle\Mapping\GenericTypePropertyMetadataLoader;
-use Mtarld\JsonEncoderBundle\Mapping\PropertyMetadataLoader;
 use Symfony\Component\TypeInfo\Type;
-use Symfony\Component\TypeInfo\TypeContext\TypeContextFactory;
 use Symfony\Component\TypeInfo\TypeResolver\StringTypeResolver;
-use Mtarld\JsonEncoderBundle\Mapping\TypeResolver;
-use Symfony\Component\TypeInfo\TypeResolver\TypeResolver as TypeInfoResolver;
 use TurboSerializer\Serializer;
 
 class TurboSerializerBench extends AbstractBench
@@ -26,30 +17,14 @@ class TurboSerializerBench extends AbstractBench
 
     public function bootstrap(): void
     {
-        $encoderCacheDir = $this->cacheDir . '/json_encoder/turbo_encoder';
-        $decoderCacheDir = $this->cacheDir . '/json_encoder/turbo_decoder';
-        $lazyGhostCacheDir = $this->cacheDir . '/json_encoder/turbo_lazy_ghost';
+        $cacheDir = $this->cacheDir . '/json_encoder/turbo_encoder';
 
-        $typeContextFactory = new TypeContextFactory($stringTypeResolver = new StringTypeResolver());
-        $typeResolver = new TypeResolver(TypeInfoResolver::create(), $typeContextFactory);
-
-        $jsonEncoder = new JsonEncoder(new GenericTypePropertyMetadataLoader(
-            new EncodeDateTimeTypePropertyMetadataLoader(new EncodeAttributePropertyMetadataLoader(
-                new PropertyMetadataLoader($typeResolver),
-                $typeResolver,
-            )),
-            $typeContextFactory,
-        ), $encoderCacheDir);
-
-        $jsonDecoder = new JsonDecoder(new GenericTypePropertyMetadataLoader(
-            new DecodeDateTimeTypePropertyMetadataLoader(new DecodeAttributePropertyMetadataLoader(
-                new PropertyMetadataLoader($typeResolver),
-                $typeResolver,
-            )),
-            $typeContextFactory,
-        ), $decoderCacheDir);
-
-        $this->serializer = new Serializer($jsonEncoder, $jsonDecoder, AutoMapper::create(), $stringTypeResolver);
+        $this->serializer = new Serializer(
+            JsonEncoder::create($cacheDir),
+            JsonDecoder::create($cacheDir),
+            AutoMapper::create(),
+            new StringTypeResolver(),
+        );
     }
 
     protected function doBenchSerialize(): string
