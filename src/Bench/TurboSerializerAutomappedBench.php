@@ -20,15 +20,15 @@ use Mtarld\JsonEncoderBundle\Mapping\TypeResolver;
 use Symfony\Component\TypeInfo\TypeResolver\TypeResolver as TypeInfoResolver;
 use TurboSerializer\Serializer;
 
-class TurboSerializerBench extends AbstractBench
+final class TurboSerializerAutomappedBench extends AbstractBench
 {
     private Serializer $serializer;
 
     public function bootstrap(): void
     {
-        $encoderCacheDir = $this->cacheDir . '/json_encoder/turbo_encoder';
-        $decoderCacheDir = $this->cacheDir . '/json_encoder/turbo_decoder';
-        $lazyGhostCacheDir = $this->cacheDir . '/json_encoder/turbo_lazy_ghost';
+        $encoderCacheDir = $this->cacheDir . '/json_encoder/turbo_encoder_automapped';
+        $decoderCacheDir = $this->cacheDir . '/json_encoder/turbo_decoder_automapped';
+        $lazyGhostCacheDir = $this->cacheDir . '/json_encoder/turbo_lazy_ghost_automapped';
 
         $typeContextFactory = new TypeContextFactory($stringTypeResolver = new StringTypeResolver());
         $typeResolver = new TypeResolver(TypeInfoResolver::create(), $typeContextFactory);
@@ -54,17 +54,26 @@ class TurboSerializerBench extends AbstractBench
 
     protected function doBenchSerialize(): string
     {
-        return $this->serializer->serialize($this->toSerialize, 'json', [Serializer::TYPE => Type::list(Type::object(Person::class))]);
+        $type = Type::list(Type::object(Person::class));
+
+        return $this->serializer->serialize($this->toSerialize, 'json', [
+            Serializer::TYPE => $type,
+            Serializer::NORMALIZED_TYPE => $type,
+        ]);
     }
 
     protected function doBenchDeserialize(): array
     {
-        return $this->serializer->deserialize($this->toDeserialize, (string) Type::list(Type::object(Person::class)), 'json');
+        $type = Type::list(Type::object(Person::class));
+
+        return $this->serializer->deserialize($this->toDeserialize, (string) $type, 'json', [
+            Serializer::NORMALIZED_TYPE => $type,
+        ]);
     }
 
     public function getName(): string
     {
-        return 'TurboSerializer';
+        return 'TurboSerializer automapped';
     }
 
     public function getPackageName(): string
