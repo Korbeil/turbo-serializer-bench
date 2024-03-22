@@ -28,5 +28,8 @@
         "psr-4": {
             "Korbeil\\TurboSerializerBench\\" : "src/"
         }
+    },
+    "scripts": {
+        "bench": "vendor/bin/phpbench run --warmup=1 --report=benchmark"
     }
 }
